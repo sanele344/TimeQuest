@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Traveler Quest</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom right, #0a0a23, #1a1a4b);
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  #game {
+    max-width: 700px;
+    margin: 60px auto;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(255,255,255,0.2);
+  }
+  h1 { color: #ffcc70; font-size: 2rem; }
+  button {
+    padding: 10px 20px;
+    margin: 8px;
+    background: #00adb5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover { background: #08d9d6; }
+  #feedback { margin-top: 15px; font-weight: bold; }
+  .choice-btn {
+    display: block;
+    width: 100%;
+    margin: 6px auto;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+  }
+  .choice-btn:hover { background: rgba(255,255,255,0.3); }
+</style>
+</head>
+<body>
+
+<div id="game">
+  <h1>🕰️ Time Traveler Quest</h1>
+  <p>Welcome, traveler! Solve riddles from each era to journey through time!</p>
+
+  <div id="level"></div>
+  <div id="choices"></div>
+
+  <div id="controls">
+    <button onclick="prevLevel()">⬅️ Back</button>
+    <button onclick="nextLevel()">Skip ➡️</button>
+    <button onclick="restartGame()">🔄 Restart</button>
+  </div>
+
+  <p id="feedback"></p>
+</div>
+
+<script>
+// --- Original + Existing Levels ---
+const baseLevels = [
+  { era: "🪨 Stone Age", riddle: "I was used before metal, shaped by hand, to cut, hunt, and defend. What am I?", answer: "stone", options: ["stone", "stick", "fire", "spear"] },
+  { era: "🏺 Ancient Egypt", riddle: "I have a body but no life, wrapped tight and sealed in a tomb. What am I?", answer: "mummy", options: ["pharaoh", "sphinx", "mummy", "pyramid"] },
+  { era: "🏛️ Ancient Greece", riddle: "I’m where athletes compete, wearing no shoes, for glory and fame. What am I?", answer: "olympics", options: ["stadium", "gladiator", "olympics", "race"] },
+  { era: "⚔️ Medieval Times", riddle: "I wear armor and ride a horse, serving my lord with sword and force. Who am I?", answer: "knight", options: ["prince", "soldier", "king", "knight"] },
+  { era: "🎨 Renaissance", riddle: "I painted ceilings high and grand, in a chapel built by hand. Who am I?", answer: "michelangelo", options: ["da vinci", "raphael", "michelangelo", "donatello"] },
+  { era: "💡 Industrial Age", riddle: "I bring light to night with a glowing thread. Who am I?", answer: "thomas edison", options: ["tesla", "thomas edison", "bell", "franklin"] },
+  { era: "🌍 Modern Era", riddle: "I connect people across the Earth, through screens and wires since my birth. What am I?", answer: "internet", options: ["telephone", "computer", "internet", "television"] },
+  { era: "🚀 Future City", riddle: "I fly without wings and drive through the air. What am I?", answer: "hovercar", options: ["drone", "hovercar", "rocket", "jet"] }
+];
+
+// --- 50 New Levels (59–108) ---
+const newLevels = [ /* (as in your provided code) */ ];
+
+// --- 70 Brand-New Levels (109–178) ---
+const bonusLevels = [
+  { era: "🌠 Quest 109", riddle: "I have a face and two hands but no arms or legs. What am I?", answer: "clock", options: ["clock", "mirror", "watch", "robot"] },
+  { era: "🌠 Quest 110", riddle: "I follow you everywhere, but I can’t move on my own. What am I?", answer: "shadow", options: ["shadow", "mirror", "ghost", "reflection"] },
+  { era: "🌠 Quest 111", riddle: "I can be cracked, made, told, and played. What am I?", answer: "joke", options: ["joke", "egg", "code", "song"] },
+  { era: "🌠 Quest 112", riddle: "I get wetter as I dry. What am I?", answer: "towel", options: ["towel", "sponge", "rain", "soap"] },
+  { era: "🌠 Quest 113", riddle: "I’m taken from a mine, locked in a wooden case, never released until I’m used. What am I?", answer: "pencil lead", options: ["pencil lead", "coal", "diamond", "iron"] },
+  { era: "🌠 Quest 114", riddle: "The more you share me, the more I grow. What am I?", answer: "knowledge", options: ["love", "knowledge", "money", "fire"] },
+  { era: "🌠 Quest 115", riddle: "I’m full of holes but strong enough to hold water. What am I?", answer: "sponge", options: ["sponge", "net", "bucket", "pipe"] },
+  { era: "🌠 Quest 116", riddle: "I never ask questions, but I’m always answered. What am I?", answer: "doorbell", options: ["doorbell", "telephone", "radio", "email"] },
+  { era: "🌠 Quest 117", riddle: "I am always ahead of you but can never be caught. What am I?", answer: "future", options: ["future", "shadow", "time", "tomorrow"] },
+  { era: "🌠 Quest 118", riddle: "You can catch me but can’t throw me. What am I?", answer: "cold", options: ["cold", "shadow", "rain", "feeling"] },
+  { era: "🌠 Quest 119", riddle: "I am a king without a crown, ruler of the skies. What am I?", answer: "sun", options: ["sun", "moon", "eagle", "wind"] },
+  { era: "🌠 Quest 120", riddle: "I shrink when I work, but I glow while doing it. What am I?", answer: "candle", options: ["candle", "battery", "lightbulb", "fire"] },
+  { era: "🌠 Quest 121", riddle: "I can travel around the world while staying in one corner. What am I?", answer: "stamp", options: ["stamp", "envelope", "coin", "compass"] },
+  { era: "🌠 Quest 122", riddle: "I have a head and tail but no body. What am I?", answer: "coin", options: ["coin", "snake", "arrow", "comet"] },
+  { era: "🌠 Quest 123", riddle: "I have one eye but can’t see. What am I?", answer: "needle", options: ["needle", "storm", "cyclops", "pin"] },
+  { era: "🌠 Quest 124", riddle: "I get sharper the more you use me. What am I?", answer: "brain", options: ["brain", "pencil", "knife", "mind"] },
+  { era: "🌠 Quest 125", riddle: "I’m found in seconds, centuries, and minutes, but not in days or years. What am I?", answer: "n", options: ["n", "s", "c", "e"] },
+  { era: "🌠 Quest 126", riddle: "You can’t see me, but I can destroy mountains. What am I?", answer: "wind", options: ["wind", "fire", "time", "water"] },
+  { era: "🌠 Quest 127", riddle: "I’m tall when young and short when old. What am I?", answer: "candle", options: ["candle", "tree", "pencil", "tower"] },
+  { era: "🌠 Quest 128", riddle: "I am where today comes before yesterday. What am I?", answer: "dictionary", options: ["dictionary", "timeline", "book", "calendar"] },
+  { era: "🌠 Quest 129", riddle: "I have many keys but can’t open a single lock. What am I?", answer: "piano", options: ["piano", "keyboard", "map", "safe"] },
+  { era: "🌠 Quest 130", riddle: "I am the only place where success comes before work. What am I?", answer: "dictionary", options: ["dictionary", "school", "office", "book"] },
+  { era: "🌠 Quest 131", riddle: "I’m seen once in a minute, twice in a moment, but never in a thousand years. What am I?", answer: "m", options: ["m", "n", "e", "t"] },
+  { era: "🌠 Quest 132", riddle: "I have 88 keys but can’t open doors. What am I?", answer: "piano", options: ["piano", "keyboard", "lockbox", "safe"] },
+  { era: "🌠 Quest 133", riddle: "The more of me you take, the more you leave behind. What am I?", answer: "footsteps", options: ["footsteps", "memories", "holes", "time"] },
+  { era: "🌠 Quest 134", riddle: "I’m not alive, but I die if you forget me. What am I?", answer: "memory", options: ["memory", "dream", "fire", "song"] },
+  { era: "🌠 Quest 135", riddle: "I can fly without wings and cry without eyes. What am I?", answer: "cloud", options: ["cloud", "wind", "smoke", "shadow"] },
+  { era: "🌠 Quest 136", riddle: "I can be cracked, told, made, and played. What am I?", answer: "joke", options: ["joke", "code", "egg", "story"] },
+  { era: "🌠 Quest 137", riddle: "I am round but not always around; I can be half but never broken. What am I?", answer: "moon", options: ["moon", "sun", "earth", "coin"] },
+  { era: "🌠 Quest 138", riddle: "I can run, but I never walk. I can murmur, but I never talk. What am I?", answer: "river", options: ["river", "wind", "shadow", "clock"] },
+  { era: "🌠 Quest 139", riddle: "I build castles but am washed away by waves. What am I?", answer: "sand", options: ["sand", "stone", "salt", "foam"] },
+  { era: "🌠 Quest 140", riddle: "I have no life, but I can die. What am I?", answer: "battery", options: ["battery", "fire", "light", "machine"] },
+  { era: "🌠 Quest 141", riddle: "I can’t be seen, but you can feel me. I can calm you or destroy cities. What am I?", answer: "wind", options: ["wind", "water", "love", "time"] },
+  { era: "🌠 Quest 142", riddle: "I’m a window to another world, but not made of glass. What am I?", answer: "screen", options: ["screen", "book", "mirror", "dream"] },
+  { era: "🌠 Quest 143", riddle: "I have words but never speak. What am I?", answer: "book", options: ["book", "radio", "sign", "letter"] },
+  { era: "🌠 Quest 144", riddle: "I am a bridge you can walk on but never cross. What am I?", answer: "rainbow", options: ["rainbow", "shadow", "road", "dream"] },
+  { era: "🌠 Quest 145", riddle: "You see me once in June, twice in November, but not at all in May. What am I?", answer: "e", options: ["e", "n", "o", "r"] },
+  { era: "🌠 Quest 146", riddle: "I fly around all day but never leave my corner. What am I?", answer: "stamp", options: ["stamp", "bee", "drone", "fly"] },
+  { era: "🌠 Quest 147", riddle: "I exist only when there is light, but I die if the light shines on me. What am I?", answer: "shadow", options: ["shadow", "reflection", "mirror", "dream"] },
+  { era: "🌠 Quest 148", riddle: "I’m always running but never move. What am I?", answer: "clock", options: ["clock", "time", "river", "mind"] },
+  { era: "🌠 Quest 149", riddle: "I’m not a cat, but I have nine lives. What am I?", answer: "book", options: ["book", "myth", "tale", "phoenix"] },
+  { era: "🌠 Quest 150", riddle: "I’m the beginning of the end and the end of time and space. What am I?", answer: "e", options: ["e", "t", "infinity", "zero"] },
+  { era: "🌠 Quest 151", riddle: "I have legs but cannot walk. What am I?", answer: "table", options: ["table", "chair", "clock", "bed"] },
+  { era: "🌠 Quest 152", riddle: "I am born in water but die in air. What am I?", answer: "bubble", options: ["bubble", "fish", "ice", "cloud"] },
+  { era: "🌠 Quest 153", riddle: "I make two people out of one. What am I?", answer: "mirror", options: ["mirror", "shadow", "camera", "echo"] },
+  { era: "🌠 Quest 154", riddle: "I am invisible, but I make everything visible. What am I?", answer: "light", options: ["light", "air", "sound", "fire"] },
+  { era: "🌠 Quest 155", riddle: "I am tall when born, short when old, and shine when alive. What am I?", answer: "candle", options: ["candle", "torch", "tree", "battery"] },
+  { era: "🌠 Quest 156", riddle: "I have ears but can’t hear. What am I?", answer: "corn", options: ["corn", "jar", "mask", "book"] },
+  { era: "🌠 Quest 157", riddle: "I am black when you buy me, red when you use me, and gray when you throw me away. What am I?", answer: "charcoal", options: ["charcoal", "match", "fire", "ash"] },
+  { era: "🌠 Quest 158", riddle: "I can hold water though I am full of holes. What am I?", answer: "sponge", options: ["sponge", "net", "cloth", "bucket"] },
+  { era: "🌠 Quest 159", riddle: "I can be long or short, grown or bought, painted or bare. What am I?", answer: "hair", options: ["hair", "rope", "grass", "string"] },
+  { era: "🌠 Quest 160", riddle: "I am taken before you get me. What am I?", answer: "photo", options: ["photo", "ticket", "dream", "memory"] },
+  { era: "🌠 Quest 161", riddle: "I am a mother and father, but never gave birth. What am I?", answer: "earth", options: ["earth", "time", "tree", "water"] },
+  { era: "🌠 Quest 162", riddle: "I go through cities and fields but never move. What am I?", answer: "road", options: ["road", "river", "path", "map"] },
+  { era: "🌠 Quest 163", riddle: "I am always hungry and must be fed. What am I?", answer: "fire", options: ["fire", "machine", "river", "wind"] },
+  { era: "🌠 Quest 164", riddle: "I can’t talk, but I can reply when spoken to. What am I?", answer: "echo", options: ["echo", "mirror", "shadow", "computer"] },
+  { era: "🌠 Quest 165", riddle: "I never stop moving, but I have no legs. What am I?", answer: "time", options: ["time", "river", "wind", "clock"] },
+  { era: "🌠 Quest 166", riddle: "I have a ring but no finger. What am I?", answer: "telephone", options: ["telephone", "bell", "planet", "tree"] },
+  { era: "🌠 Quest 167", riddle: "I am the heart of the home, yet I burn. What am I?", answer: "fireplace", options: ["fireplace", "stove", "lamp", "hearth"] },
+  { era: "🌠 Quest 168", riddle: "I can be opened but never closed. What am I?", answer: "egg", options: ["egg", "door", "book", "envelope"] },
+  { era: "🌠 Quest 169", riddle: "I’m white and cold, but I melt when I’m old. What am I?", answer: "snow", options: ["snow", "ice", "frost", "hail"] },
+  { era: "🌠 Quest 170", riddle: "I’m a mountain’s tear. What am I?", answer: "river", options: ["river", "snow", "rain", "stream"] },
+  { era: "🌠 Quest 171", riddle: "I’m the only thing that gets wetter the more it dries. What am I?", answer: "towel", options: ["towel", "sponge", "cloth", "rain"] },
+  { era: "🌠 Quest 172", riddle: "I sleep by day, fly by night, and have no feathers to aid my flight. What am I?", answer: "bat", options: ["bat", "owl", "moth", "ghost"] },
+  { era: "🌠 Quest 173", riddle: "I can build up, tear down, make you cry or make you smile. What am I?", answer: "words", options: ["words", "music", "time", "dreams"] },
+  { era: "🌠 Quest 174", riddle: "I can be stolen but never taken. What am I?", answer: "kiss", options: ["kiss", "heart", "shadow", "idea"] },
+  { era: "🌠 Quest 175", riddle: "I am born when two people meet but can die with silence. What am I?", answer: "friendship", options: ["friendship", "love", "conversation", "trust"] },
+  { era: "🌠 Quest 176", riddle: "I am there before you speak but gone when you listen. What am I?", answer: "thought", options: ["thought", "word", "dream", "echo"] },
+  { era: "🌠 Quest 177", riddle: "I move without feet, see without eyes, and live in your pocket. What am I?", answer: "phone", options: ["phone", "wind", "ghost", "echo"] },
+  { era: "🌠 Quest 178", riddle: "I am the quiet companion of night, full of borrowed light. What am I?", answer: "moon", options: ["moon", "star", "lamp", "planet"] }
+];
+
+// --- Combine all levels ---
+const levels = baseLevels.concat(newLevels).concat(bonusLevels);
+let currentLevel = 0;
+
+// --- Game Functions ---
+function showLevel() {
+  document.getElementById('feedback').innerText = '';
+  if (currentLevel >= levels.length) {
+    document.getElementById('level').innerHTML = `
+      <h2>🎉 Congratulations!</h2>
+      <p>You’ve completed your journey through all of time! 🕰️</p>
+      <p>From stones to stars, you are a true Time Traveler!</p>
+    `;
+    document.getElementById('choices').innerHTML = '';
+    return;
+  }
+
+  const l = levels[currentLevel];
+  document.getElementById('level').innerHTML = `
+    <h2>${l.era}</h2>
+    <p><i>${l.riddle}</i></p>
+    <p><b>Level ${currentLevel + 1} of ${levels.length}</b></p>
+  `;
+
+  const choicesDiv = document.getElementById('choices');
+  choicesDiv.innerHTML = '';
+  l.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.classList.add('choice-btn');
+    btn.textContent = opt;
+    btn.onclick = () => checkAnswer(opt);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(choice) {
+  const correct = levels[currentLevel].answer.toLowerCase();
+  const feedback = document.getElementById('feedback');
+  if (choice.toLowerCase() === correct) {
+    feedback.innerHTML = "✅ Correct! The time gate opens...";
+    setTimeout(() => { currentLevel++; showLevel(); }, 1000);
+  } else {
+    feedback.innerHTML = "❌ Wrong! Think carefully, traveler...";
+  }
+}
+
+function nextLevel() {
+  if (currentLevel < levels.length - 1) {
+    currentLevel++;
+    showLevel();
+  }
+}
+
+function prevLevel() {
+  if (currentLevel > 0) {
+    currentLevel--;
+    showLevel();
+  }
+}
+
+function restartGame() {
+  currentLevel = 0;
+  showLevel();
+}
+
+showLevel();
+</script>
+
+<!-- Background Music -->
+<audio id="bgMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2025/05/12/339939_ambient-ambient-background.mp3?filename=ambient-ambient-background-339939.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Start Game Button -->
+<div id="startScreen" style="text-align:center; margin-top:50px;">
+  <button id="startBtn" style="
+    background:#ffcc70;
+    color:#000;
+    font-weight:bold;
+    border:none;
+    border-radius:8px;
+    padding:12px 24px;
+    cursor:pointer;
+    font-size:1.1rem;">
+    🚀 Start Your Time Journey
+  </button>
+</div>
+
+<script>
+const bgMusic = document.getElementById("bgMusic");
+const gameDiv = document.getElementById("game");
+const startScreen = document.getElementById("startScreen");
+const startBtn = document.getElementById("startBtn");
+
+gameDiv.style.display = "none"; // hide the game until user starts
+
+startBtn.addEventListener("click", () => {
+  // Start the background music safely
+  bgMusic.play().then(() => {
+    console.log("Music started successfully");
+  }).catch(err => {
+    console.warn("Autoplay blocked, waiting for user gesture:", err);
+  });
+
+  // Hide start screen and show game
+  startScreen.style.display = "none";
+  gameDiv.style.display = "block";
+  showLevel();
+});
+
+// Optional: Add a pause/resume music button inside the game controls
+const musicToggleBtn = document.createElement("button");
+musicToggleBtn.innerText = "🔇 Pause Music";
+musicToggleBtn.style.marginLeft = "10px";
+musicToggleBtn.onclick = () => {
+  if (bgMusic.paused) {
+    bgMusic.play();
+    musicToggleBtn.innerText = "🔇 Pause Music";
+  } else {
+    bgMusic.pause();
+    musicToggleBtn.innerText = "🎵 Play Music";
+  }
+};
+document.getElementById("controls").appendChild(musicToggleBtn);
+</script>
+
+
+</body>
+</html>
